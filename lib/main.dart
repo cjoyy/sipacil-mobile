@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sipacil/menu.dart';
+import 'package:sipacil/screens/menu.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,8 +15,8 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(
-       primarySwatch: Colors.deepPurple,
- ).copyWith(secondary: Colors.deepPurple[400]),
+          primarySwatch: Colors.deepPurple,
+        ).copyWith(secondary: Colors.deepPurple[400]),
         useMaterial3: true,
       ),
       home: MyHomePage(),
