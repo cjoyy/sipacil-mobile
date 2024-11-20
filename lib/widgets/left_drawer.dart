@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sipacil/screens/menu.dart';
 import 'package:sipacil/screens/productentry_form.dart'; // Impor halaman form produk
+import 'package:sipacil/screens/list_product_entry.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -59,6 +60,18 @@ class LeftDrawer extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => const ProductEntryFormPage(),
                 ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add_reaction_rounded),
+            title: const Text('Daftar Product'),
+            onTap: () {
+              // Route menu ke halaman mood
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ProductEntryPage()),
               );
             },
           ),

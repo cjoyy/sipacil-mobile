@@ -5,6 +5,168 @@
 <!-- ### Link  :  -->
 ---
 
+# Tugas 9: Implementasi Model dan Autentikasi di Flutter dan Django
+
+<details>
+<summary>Click for more detail</summary>
+<br>
+
+1. **Mengapa Kita Perlu Membuat Model untuk Pengambilan atau Pengiriman Data JSON?**
+   - **Kegunaan Model**: Model membantu memetakan data JSON ke objek di aplikasi, sehingga lebih mudah diolah dan digunakan.
+   - **Keuntungan**: Model mempermudah validasi data, menghindari error seperti `KeyError`, dan memastikan tipe data konsisten.
+   - **Konsekuensi Tanpa Model**: Aplikasi mungkin tetap berjalan, tetapi pengolahan data menjadi rentan terhadap error, dan kode menjadi lebih sulit dibaca dan dipelihara.
+
+
+2. **Fungsi dari Library `http`**
+   - **Kegunaan**: Library `http` digunakan untuk mengirim permintaan HTTP (seperti `GET`, `POST`, `PUT`, `DELETE`) ke server dan menerima respons dari server.
+   - **Fungsi Utama**:
+     - Mengirim data dari aplikasi ke server.
+     - Menerima data dari server untuk ditampilkan pada aplikasi.
+   - **Contoh Kasus Penggunaan**: Mengambil daftar produk dari server atau mengirimkan data formulir pengguna ke backend.
+
+
+3. **Fungsi dari `CookieRequest`**
+   - **Kegunaan**: `CookieRequest` digunakan untuk menangani autentikasi dan menyimpan sesi pengguna dengan cookies.
+   - **Alasan Berbagi Instance**: Instance `CookieRequest` perlu dibagikan ke semua komponen agar:
+     - Sesi pengguna tetap konsisten di seluruh aplikasi.
+     - Tidak perlu membuat permintaan ulang untuk autentikasi di setiap komponen.
+
+
+4. **Mekanisme Pengiriman Data**
+   1. **Input Data pada Flutter**:
+      - Pengguna memasukkan data melalui formulir atau elemen input lain.
+   2. **Pengiriman Data ke Server**:
+      - Flutter mengirim data ke server Django menggunakan metode HTTP, seperti `POST`.
+   3. **Proses di Backend**:
+      - Django memproses data, menyimpannya di database, dan mengembalikan respons.
+   4. **Menampilkan Data pada Flutter**:
+      - Flutter menerima respons JSON dari Django dan mengolahnya untuk ditampilkan.
+
+
+5. **Mekanisme Autentikasi**
+   1. **Login**:
+      - Flutter mengirim data akun (email dan password) ke Django.
+      - Django memverifikasi data dan mengembalikan token sesi yang disimpan di `CookieRequest`.
+   2. **Register**:
+      - Flutter mengirim data pengguna baru ke Django.
+      - Django memvalidasi dan menyimpan data pengguna di database.
+   3. **Logout**:
+      - Flutter mengirim permintaan logout ke Django.
+      - Django menghapus sesi pengguna, sehingga token tidak valid lagi.
+   4. **Hasilnya**:
+      - Jika login berhasil, menu aplikasi ditampilkan. Jika gagal, pesan error ditampilkan.
+
+
+6. **Langkah Implementasi**
+
+#### **a. Mengimplementasikan Fitur Registrasi dan Login Akun serta Integrasi Sistem Autentikasi Django dengan Flutter**
+1. **Menambahkan Provider dan `pbp_django_auth`:**
+   - Install package `pbp_django_auth` dan tambahkan dependensi ini ke `pubspec.yaml`.
+   - Tambahkan konfigurasi `CookieRequest` untuk menangani autentikasi berbasis cookies.
+
+2. **Membuat Method pada Aplikasi Django:**
+   - Tambahkan endpoint untuk login, registrasi, dan logout di aplikasi Django.
+   - Implementasikan logika autentikasi menggunakan Django `auth`.
+
+3. **Menambahkan `CookieRequest` pada Page yang Dibutuhkan:**
+   - Buat instance `CookieRequest` di setiap halaman Flutter yang memerlukan autentikasi, seperti login dan registrasi.
+
+4. **Membuat Halaman Login dan Register di Flutter:**
+   - Buat page untuk login dan registrasi menggunakan `TextField` untuk input pengguna.
+   - Tambahkan validasi input dan integrasikan dengan sistem autentikasi Django menggunakan request HTTP.
+
+
+#### **b. Membuat Model Kustom untuk Proyek Django**
+1. **Mengambil Data JSON dari Django:**
+   - Jalankan aplikasi Django untuk mendapatkan struktur JSON data produk dari endpoint API.
+
+2. **Menggunakan QuickType untuk Membuat Model Dart:**
+   - Salin JSON ke [QuickType](https://app.quicktype.io/).
+   - Pilih bahasa **Dart** dan beri nama model sesuai kebutuhan, seperti `Product`.
+   - Salin kode Dart yang dihasilkan ke file dalam folder `models` di proyek Flutter.
+
+3. **Menyesuaikan Model dengan Data JSON:**
+   - Sesuaikan nama dan properti model agar sesuai dengan data dari backend Django.
+
+#### **c. Membuat Halaman Daftar Produk**
+1. **Mengambil Data JSON dari Endpoint Django:**
+   - Lakukan request ke endpoint Django menggunakan HTTP.
+   - Parsing data JSON ke dalam list model Dart menggunakan kode berikut:
+     ```dart
+     List<ProductEntry> listProduct = [];
+     for (var d in data) {
+       if (d != null) {
+         listProduct.add(ProductEntry.fromJson(d));
+       }
+     }
+     return listProduct;
+     ```
+
+2. **Menampilkan Data dengan `ListView`:**
+   - Gunakan `ListView.builder` untuk menampilkan produk.
+   - Pada setiap item, tampilkan `product`, `price`, dan `description` dari produk.
+
+
+
+#### **d. Membuat Halaman Detail Produk**
+1. **Membuat File Baru dalam Folder Screens:**
+   - Buat file seperti `product_detail.dart`.
+   - Tambahkan class baru dengan konstruktor yang menerima objek `Product`.
+
+2. **Menampilkan Semua Field Produk:**
+   - Gunakan widget Flutter seperti `Text` untuk menampilkan atribut dari produk.
+   - Pastikan semua atribut dari model `Product` tersedia di halaman ini.
+
+
+
+#### **e. Mengakses Halaman Detail dari Daftar Produk**
+1. **Menambahkan `onTap` pada ListTile:**
+   - Gunakan `Navigator.push` untuk berpindah ke halaman detail produk:
+     ```dart
+     onTap: () {
+       Navigator.push(
+         context,
+         MaterialPageRoute(
+           builder: (context) => ProductDetailPage(
+             product: snapshot.data![index],
+           ),
+         ),
+       );
+     },
+     ```
+
+
+
+#### **f. Menambahkan Tombol untuk Kembali**
+1. **Back Button Otomatis:**
+   - `Navigator.push` secara default akan menambahkan tombol kembali di AppBar.
+
+2. **Menambahkan Tombol Manual:**
+   - Jika ingin menambahkan tombol kembali secara manual:
+     ```dart
+     ElevatedButton(
+       onPressed: () => Navigator.pop(context),
+       child: const Text("Kembali ke Product List"),
+     ),
+     ```
+
+
+
+#### **g. Filter Produk Berdasarkan Pengguna yang Login**
+1. **Filter di Backend Django:**
+   - Modifikasi endpoint Django untuk hanya mengembalikan produk yang terkait dengan pengguna yang login.
+   - Gunakan filter seperti:
+     ```python
+     products = Product.objects.filter(user=request.user)
+     ```
+
+2. **Menampilkan Data di Flutter:**
+   - Pastikan hanya data yang difilter oleh Django yang diambil dan ditampilkan di halaman daftar produk.
+
+---
+
+</details>
+
 
 # Tugas 8: Flutter Navigation, Layouts, Forms, and Input Elements
 

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sipacil/widgets/left_drawer.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:sipacil/screens/menu.dart';
+import 'dart:convert';
 
 class ProductEntryFormPage extends StatefulWidget {
   const ProductEntryFormPage({super.key});
@@ -9,8 +13,16 @@ class ProductEntryFormPage extends StatefulWidget {
 }
 
 class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
+  final _formKey = GlobalKey<FormState>();
+  String _product = "";
+  int _price = 0;
+  String _description = "";
+  // int _rating = 0;
+  // bool _available = false;
+
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Scaffold(
       appBar: AppBar(
         title: const Center(
@@ -122,36 +134,36 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                       backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).colorScheme.primary),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Product berhasil tersimpan'),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Product: $_product'),
-                                    Text(
-                                        'Description: $_description'), // Menampilkan deskripsi
-                                    Text('Price: $_price'), // Menampilkan harga
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _formKey.currentState!.reset();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                        // Kirim ke Django dan tunggu respons
+                        final response = await request.postJson(
+                          "http://localhost:8000/create-flutter/",
+                          jsonEncode(<String, String>{
+                            'product': _product,
+                            'price': _price.toString(),
+                            'description': _description,
+                          }),
                         );
+                        if (context.mounted) {
+                          if (response['status'] == 'success') {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text("Product baru berhasil disimpan!"),
+                            ));
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MyHomePage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text(
+                                  "Terdapat kesalahan, silakan coba lagi."),
+                            ));
+                          }
+                        }
                       }
                     },
                     child: const Text(
@@ -167,9 +179,4 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
       ),
     );
   }
-
-  final _formKey = GlobalKey<FormState>();
-  String _product = "";
-  String _description = "";
-  int _price = 0;
 }
