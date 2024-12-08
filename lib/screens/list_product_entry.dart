@@ -13,8 +13,8 @@ class ProductEntryPage extends StatefulWidget {
 }
 
 class _ProductEntryPageState extends State<ProductEntryPage> {
-  Future<List<ProductEntry>> fetchMood(CookieRequest request) async {
-    final response = await request.get('http://localhost:8000/json/');
+  Future<List<ProductEntry>> fetchProduct(CookieRequest request) async {
+    final response = await request.get('http://127.0.0.1:8000/json/');
 
     var data = response;
 
@@ -35,53 +35,48 @@ class _ProductEntryPageState extends State<ProductEntryPage> {
         title: const Text('Product List'),
       ),
       drawer: const LeftDrawer(),
-      body: FutureBuilder(
-        future: fetchMood(request),
-        builder: (context, AsyncSnapshot snapshot) {
-          if (snapshot.data == null) {
+      body: FutureBuilder<List<ProductEntry>>(
+        future: fetchProduct(request),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text(
+                'Belum ada data product.',
+                style: TextStyle(fontSize: 20, color: Color(0xff59A5D8)),
+              ),
+            );
           } else {
-            if (!snapshot.hasData) {
-              return const Column(
-                children: [
-                  Text(
-                    'Belum ada product-an :(',
-                    style: TextStyle(fontSize: 20, color: Color(0xff59A5D8)),
-                  ),
-                  SizedBox(height: 8),
-                ],
-              );
-            } else {
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (_, index) => Card(
-                  child: ListTile(
-                    title: Text(
-                      "Name: ${snapshot.data![index].fields.name}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            "Description: ${snapshot.data![index].fields.description}"),
-                        Text("Price: ${snapshot.data![index].fields.price}"),
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProductDetailPage(
-                            item: snapshot.data![index],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              );
-            }
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final product = snapshot.data![index];
+                return ListTile(
+                  title: Text(product.fields.product),
+                  // Menampilkan deskripsi dan harga produk
+                  subtitle: Text(
+                      'Price: Rp${product.fields.price}\nDescription: ${product.fields.description}'),
+                  onTap: () {
+                    // Navigate to the product detail page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProductDetailPage(product: product),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
           }
         },
       ),

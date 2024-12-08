@@ -99,10 +99,10 @@ class _LoginPageState extends State<LoginPage> {
                       String password = _passwordController.text;
 
                       // Cek kredensial
-                      // Untuk menyambungkan Android emulator dengan Django pada localhost,
+                      // Untuk menyambungkan Android emulator dengan Django pada 127.0.0.1,
                       // gunakan URL http://10.0.2.2/
                       final response = await request
-                          .login("http://localhost:8000/auth/login/", {
+                          .login("http://127.0.0.1:8000/auth/login/", {
                         'username': username,
                         'password': password,
                       });
