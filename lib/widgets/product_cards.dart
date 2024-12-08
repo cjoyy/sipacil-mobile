@@ -39,14 +39,14 @@ class ItemCard extends StatelessWidget {
                 builder: (context) => const ProductEntryFormPage(),
               ),
             );
-          } else if (item.name == "View Product") {
+          } else if (item.name == "Lihat Daftar Product") {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ProductEntryPage()),
             );
           } else if (item.name == "Logout") {
             final response =
-                await request.logout("http://localhost:8000/auth/logout/");
+                await request.logout("http://127.0.0.1:8000/auth/logout/");
             String message = response["message"];
             if (context.mounted) {
               if (response['status']) {
